@@ -1,6 +1,7 @@
 import gym
 import numpy as np
 from gym import spaces
+import itertools as it
 
 class RicochetEnv(gym.Env):
 
@@ -95,44 +96,87 @@ class RicochetEnv(gym.Env):
 
         self.draw_grid(buffer)
         self.draw_chip(buffer)
+        self.draw_robot(buffer)
+        self.draw_goal(buffer)
 
 
         return buffer
 
+    def draw_goal(self, buffer):
+        s = 12
+        robot_colors = [
+                (255,0,0), #r
+                (252,255,31), #y
+                (0,128,0), #g
+                (85,85,255) #b
+                ]
+        irow , icol , c= self.goal
+
+        x = icol * 40 
+        y = irow * 40
+
+        robot_i = self.color_list.index( c )
+
+        c = robot_colors[robot_i]
+
+        for i , j in it.product( range( s) , repeat = 2 ):
+            buffer[ y + i , x + j ] = c
+            buffer[ y + 40 - i , x + 40 - j ] = c
+            buffer[ y + 40 - i , x + j ] = c
+            buffer[ y + i , x + 40 - j ] = c
+
+    def draw_circle(self, buffer , c, mid_x , mid_y ):
+        s = 12 
+
+        for i , j in it.product( range( -s , +s ) , repeat =2 ) :
+            buffer[ mid_y + i , mid_x + j ] = c
+
+    def draw_robot(self,buffer):
+        robot_colors = [
+                (255,0,0), #r
+                (252,255,31), #y
+                (0,128,0), #g
+                (85,85,255) #b
+                ]
+
+        for i , c in zip( range(4) , robot_colors) :
+            irow, icol = self.robots[i]
+
+            mid_x = icol * 40 + 20
+            mid_y = irow * 40 + 20
+
+            self.draw_circle( buffer , c, mid_x , mid_y )
 
     def draw_chip(self,buffer):
-        for irow in range(self.cell_count):
-            for icol in range(self.cell_count ):
+        for irow , icol in it.product( range(self.cell_count) , repeat = 2):
+            if self.v_chip[irow, icol] :
+                if icol != self.cell_count -1:
+                    start_x = icol * 40
+                    start_y = irow * 40
 
-                if self.v_chip[irow, icol] :
-                    if icol != self.cell_count -1:
-                        start_x = icol * 40
-                        start_y = irow * 40
+                    for y in range( start_y , start_y + self.cell_size ):
+                        for i in range(5):
+                            buffer[ y , start_x + self.cell_size - i  ] = [ 90,90,90]
 
-                        for y in range( start_y , start_y + self.cell_size ):
-                            for i in range(5):
-                                buffer[ y , start_x + self.cell_size - i  ] = [ 90,90,90]
+            if self.h_chip[irow, icol]:
+                if irow != self.cell_count -1:
+                    start_x = icol * 40
+                    start_y = irow * 40
 
-                if self.h_chip[irow, icol]:
-                    if irow != self.cell_count -1:
-                        start_x = icol * 40
-                        start_y = irow * 40
-
-                        for x in range( start_x , start_x + self.cell_size ):
-                            for i in range(5):
-                                #print( irow, icol , [ start_y + self.cell_size - i -1 , x ] )
-                                buffer[ start_y + self.cell_size - i -1 , x  ] = [ 90,90,90]
+                    for x in range( start_x , start_x + self.cell_size ):
+                        for i in range(5):
+                            #print( irow, icol , [ start_y + self.cell_size - i -1 , x ] )
+                            buffer[ start_y + self.cell_size - i -1 , x  ] = [ 90,90,90]
 
     def draw_grid(self, buffer):
-        for irow in range(self.cell_count):
-            for icol in range(self.cell_count):
-                start_x = icol * self.cell_size
-                start_y = irow * self.cell_size
+        for irow , icol in it.product( range(self.cell_count) , repeat = 2):
+            start_x = icol * self.cell_size
+            start_y = irow * self.cell_size
 
-                for x in range( start_x , start_x + self.cell_size ):
-                    buffer[ x, start_y ] = [ 0,0,0]
-                    buffer[ x, start_y + self.cell_size - 1] = [ 0,0,0]
+            for x in range( start_x , start_x + self.cell_size ):
+                buffer[ x, start_y ] = [ 0,0,0]
+                buffer[ x, start_y + self.cell_size - 1] = [ 0,0,0]
 
-                for y in range( start_y , start_y + self.cell_size ):
-                    buffer[ start_x, y ] = [ 0,0,0]
-                    buffer[ start_x + self.cell_size - 1 , y] = [ 0,0,0]
+            for y in range( start_y , start_y + self.cell_size ):
+                buffer[ start_x, y ] = [ 0,0,0]
+                buffer[ start_x + self.cell_size - 1 , y] = [ 0,0,0]
