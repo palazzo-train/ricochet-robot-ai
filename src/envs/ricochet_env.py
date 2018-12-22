@@ -47,8 +47,28 @@ class RicochetEnv(gym.Env):
 
         self.reset()
 
-    def step(self, ation):
-        None
+    def step(self, action):
+        robot_id , dir_id = self.decode_action( action )
+
+        cur_row , cur_col = self.robots[robot_id]
+
+        ## 0 -> N , 1 -> E , 2 -> S , 3 -> W
+        act_func = [ self.go_N , self.go_E , self.go_S , self.go_W ]
+
+        new_row , new_col = act_func[dir_id]( robot_id , cur_row , cur_col )
+
+        self.robots[ robot_id ] = [ new_row , new_col ]
+        reward = -1
+
+        # check done
+        target_robot = ['r' , 'y' , 'g' , 'b' ].index( self.goal[2] )
+        target_loc = [ self.goal[0] , self.goal[1] ]
+
+        done = False
+        if self.robots[target_robot] == target_loc :
+            done = True
+
+        return self.robots , reward , done, ''
 
     def reset(self):
         self.robots = self.init_robots.copy()
@@ -86,6 +106,91 @@ class RicochetEnv(gym.Env):
 
         return robot_i , dir_i
 
+    def go_E( self, robot_id, cur_row , cur_col ):
+        if cur_col == self.cell_count -1 :
+            return cur_row , cur_col 
+        else:
+            for icol in range( cur_col , self.cell_count ):
+                if icol == self.cell_count -1:
+                    return cur_row ,icol 
+
+                # check chip
+                if self.v_chip[cur_row , icol ]:
+                    return cur_row , icol
+
+                # check robot
+                for j in range(4):
+                    if j == robot_id:
+                        continue
+
+                    # has robot 
+                    if self.robots[j] == [ cur_row , icol + 1] :
+                        return cur_row , icol
+
+    def go_W( self, robot_id, cur_row , cur_col ):
+        if cur_col == 0:
+            return cur_row , cur_col 
+        else:
+            for icol in range( cur_col , -1 , -1 ):
+                if icol == 0:
+                    return cur_row , icol
+
+                # check chip
+                if self.v_chip[cur_row , icol -1]:
+                    return cur_row , icol
+
+                # check robot
+                for j in range(4):
+                    if j == robot_id:
+                        continue
+
+                    # has robot  
+                    if self.robots[j] == [ cur_row , icol - 1] :
+                        return cur_row , icol
+
+    
+    def go_S( self, robot_id, cur_row , cur_col ):
+        if cur_row == self.cell_count -1:
+            return cur_row , cur_col 
+        else:
+            for irow in range( cur_row , self.cell_count):
+                if irow == self.cell_count -1:
+                    return irow , cur_col
+
+                # check chip
+                if self.h_chip[irow , cur_col]:
+                    return irow , cur_col
+
+                # check robot
+                for j in range(4):
+                    if j == robot_id:
+                        continue
+
+                    # has robot  
+                    if self.robots[j] == [ irow + 1, cur_col] :
+                        return irow, cur_col
+
+
+    def go_N( self, robot_id, cur_row , cur_col ):
+        if cur_row == 0:
+            return cur_row , cur_col 
+        else:
+            for irow in range( cur_row , -1,-1):
+                if irow == 0:
+                    return irow , cur_col
+
+                # check chip
+                if self.h_chip[irow -1, cur_col]:
+                    return irow , cur_col
+
+                # check robot
+                for j in range(4):
+                    if j == robot_id:
+                        continue
+
+                    # has robot  
+                    if self.robots[j] == [ irow - 1, cur_col] :
+                        return irow, cur_col
 
     #####################################
     #
