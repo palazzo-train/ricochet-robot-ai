@@ -5,6 +5,7 @@ from keras.optimizers import Adam
 import numpy as np
 import random
 
+
 # Deep Q-learning Agent
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -32,15 +33,32 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
+        print('act =============  ' + str(self.epsilon))
+        
+        
         if np.random.rand() <= self.epsilon:
-            return random.randrange(self.action_size)
-
+            action = random.randrange(self.action_size)
+            print(action)
+            return action
+        
+        print(' act state')
+        #print( state )
         state = state.reshape( [1, 8])
         act_values = self.model.predict(state)
-        return np.argmax(act_values[0])  # returns action
+        
+        #print('aaa')
+        print(act_values)
+        action = np.argmax(act_values[0])  # returns action
+        return action
 
 
     def learn(self, state, action, reward, next_state, done):
+        #print('state')
+        #print(state)
+        #print('next state')
+        #print(next_state)
+        state = state.reshape( [1, 8])
+        next_state = next_state.reshape( [1, 8])
         self.remember(state, action, reward, next_state, done)
         self.replay(batch_size = 16)
 
@@ -52,13 +70,32 @@ class DQNAgent:
 
         for state, action, reward, next_state, done in minibatch:
             target = reward
+            
+            next_state = next_state.reshape( [1, 8])
+            print('target: ' + str(target))
             if not done:
-                target = reward + self.gamma * \
-                       np.amax(self.model.predict(next_state)[0])
+                print('kkkkkkkkkkkkkkk')
+                print('state')
+                print(state)
+                print('predicct')
+                
+                
+                print('new next state')
+                print(next_state)
+                
+                predict_next_state_action_values = self.model.predict(next_state)
+                
+                max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
+                
+                print(predict_next_state_action_values)
+                print(max_next_state_action_value)
+                target = reward + self.gamma * max_next_state_action_value
+
             target_f = self.model.predict(state)
             target_f[0][action] = target
             self.model.fit(state, target_f, epochs=1, verbose=0)
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
 
