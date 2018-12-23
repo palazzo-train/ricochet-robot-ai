@@ -39,8 +39,17 @@ class DQNAgent:
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
+
+    def learn(self, state, action, reward, next_state, done):
+        self.remember(state, action, reward, next_state, done)
+        self.replay(batch_size = 16)
+
     def replay(self, batch_size):
+        if len( self.memory ) < batch_size :
+            return 
+
         minibatch = random.sample(self.memory, batch_size)
+
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
@@ -49,6 +58,7 @@ class DQNAgent:
             target_f = self.model.predict(state)
             target_f[0][action] = target
             self.model.fit(state, target_f, epochs=1, verbose=0)
+
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
