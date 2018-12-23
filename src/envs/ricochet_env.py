@@ -198,16 +198,18 @@ class RicochetEnv(gym.Env):
     #
     #  render
     #
-    def render(self):
-        buffer = np.ones( ( self.cell_count * self.cell_size , self.cell_count * self.cell_size , 3) ).astype('uint8') * 255
+    def render(self, mode):
 
-        self.draw_grid(buffer)
-        self.draw_chip(buffer)
-        self.draw_robot(buffer)
-        self.draw_goal(buffer)
+        if mode == 'rgb_array' :
+            buffer = np.ones( ( self.cell_count * self.cell_size , self.cell_count * self.cell_size , 3) ).astype('uint8') * 255
 
+            self.draw_grid(buffer)
+            self.draw_chip(buffer)
+            self.draw_robot(buffer)
+            self.draw_goal(buffer)
+            return buffer
 
-        return buffer
+        raise NotImplementedError
 
     def draw_goal(self, buffer):
         s = 12
