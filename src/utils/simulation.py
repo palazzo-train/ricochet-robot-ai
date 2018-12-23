@@ -186,7 +186,7 @@ class Experiment(object):
                 
                 # take action, observe reward and next state
                 next_state, reward, done, _ = self.env.step(action)
-                
+
                 # agent learn (Q-Learning update)
                 self.agent.learn(state, action, reward, next_state, done)
                 
@@ -282,8 +282,6 @@ class Experiment(object):
             # reset state in the beginning of each game
             state = env.reset()
             
-            
-            print( state)
             state = np.reshape(state, [1, 8])
             # time_t represents each frame of the game
             # Our goal is to keep the pole upright as long as possible until score of 500

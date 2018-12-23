@@ -33,21 +33,16 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
-        print('act =============  ' + str(self.epsilon))
         
         
         if np.random.rand() <= self.epsilon:
             action = random.randrange(self.action_size)
-            print(action)
             return action
         
-        print(' act state')
-        #print( state )
         state = state.reshape( [1, 8])
+
         act_values = self.model.predict(state)
         
-        #print('aaa')
-        print(act_values)
         action = np.argmax(act_values[0])  # returns action
         return action
 
@@ -72,23 +67,11 @@ class DQNAgent:
             target = reward
             
             next_state = next_state.reshape( [1, 8])
-            print('target: ' + str(target))
             if not done:
-                print('kkkkkkkkkkkkkkk')
-                print('state')
-                print(state)
-                print('predicct')
-                
-                
-                print('new next state')
-                print(next_state)
-                
                 predict_next_state_action_values = self.model.predict(next_state)
                 
                 max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
                 
-                print(predict_next_state_action_values)
-                print(max_next_state_action_value)
                 target = reward + self.gamma * max_next_state_action_value
 
             target_f = self.model.predict(state)

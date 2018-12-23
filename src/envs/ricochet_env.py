@@ -76,7 +76,7 @@ class RicochetEnv(gym.Env):
 
         self.t += 1
 
-        return self.robots , reward , done, ''
+        return self.robots.copy() , reward , done, ''
 
     def reset(self):
         self.robots = self.init_robots.copy()
