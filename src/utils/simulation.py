@@ -201,6 +201,9 @@ class Experiment(object):
             
             self.episode_length = np.append(self.episode_length,t) # keep episode length - for display
             self.episode_reward = np.append(self.episode_reward,R) # keep episode reward - for display 
+
+            if episode_number % 20 == 0 :
+                print('episode : ' + str(episode_number))
             
             # if interactive display, show update for the episode
             if interactive:
@@ -256,6 +259,8 @@ class Experiment(object):
             
             self.episode_length = np.append(self.episode_length,t) # keep episode length - for display
             self.episode_reward = np.append(self.episode_reward,R) # keep episode reward - for display 
+
+            print('episode : ' + str(episode))
             
             # if interactive display, show update for the episode
             if interactive:

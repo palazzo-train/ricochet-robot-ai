@@ -2,6 +2,7 @@ from PIL import Image
 from agent_dqn import DQNAgent
 from robot_reboot_extractor import RobotRebootExtractor
 from ricochet_env import RicochetEnv
+from keras import backend as K
 
 from keras.models import model_from_json
 
@@ -42,4 +43,15 @@ def load_model(file_name='model'):
 
     return loaded_model
 
+
+def show_trainable_params(model):
+
+    trainable_count = int(
+        np.sum([K.count_params(p) for p in set(model.trainable_weights)]))
+    non_trainable_count = int(
+        np.sum([K.count_params(p) for p in set(model.non_trainable_weights)]))
+
+    print('Total params: {:,}'.format(trainable_count + non_trainable_count))
+    print('Trainable params: {:,}'.format(trainable_count))
+    print('Non-trainable params: {:,}'.format(non_trainable_count))
 

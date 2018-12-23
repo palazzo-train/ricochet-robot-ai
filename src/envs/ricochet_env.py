@@ -38,7 +38,7 @@ class RicochetEnv(gym.Env):
         self.action_space = spaces.Discrete( 4*4 )
         self.observation_space = None
 
-        self.max_t = 20
+        self.max_t = 16
 
 
         ####

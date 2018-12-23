@@ -15,15 +15,15 @@ class DQNAgent:
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_decay = 0.95
         self.learning_rate = 0.001
         self.model = self._build_model()
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(24, activation='relu'))
+        model.add(Dense(16, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(8, activation='relu'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
@@ -55,30 +55,54 @@ class DQNAgent:
         state = state.reshape( [1, 8])
         next_state = next_state.reshape( [1, 8])
         self.remember(state, action, reward, next_state, done)
-        self.replay(batch_size = 16)
+        self.replay(done, batch_size = 4)
 
-    def replay(self, batch_size):
-        if len( self.memory ) < batch_size :
-            return 
 
-        minibatch = random.sample(self.memory, batch_size)
-
-        for state, action, reward, next_state, done in minibatch:
-            target = reward
+    def get_training_x_y( self, state, action, reward, next_state, done ):
+        target = reward
+        
+        if not done:
+            predict_next_state_action_values = self.model.predict(next_state)
             
-            next_state = next_state.reshape( [1, 8])
-            if not done:
-                predict_next_state_action_values = self.model.predict(next_state)
-                
-                max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
-                
-                target = reward + self.gamma * max_next_state_action_value
+            max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
+            
+            target = reward + self.gamma * max_next_state_action_value
 
-            target_f = self.model.predict(state)
-            target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+        target_f = self.model.predict(state)
 
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        target_f[0][action] = target
+
+        return state , target_f
+
+    def train_by_one_data( self, state, action, reward, next_state, done ):
+        target = reward
+        
+        if not done:
+            predict_next_state_action_values = self.model.predict(next_state)
+            
+            max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
+            
+            target = reward + self.gamma * max_next_state_action_value
+
+        target_f = self.model.predict(state)
+
+        target_f[0][action] = target
+        print('train')
+        print( state , target_f )
+        print( state.shape , target_f.shape)
+        self.model.fit(state, target_f, epochs=1, verbose=0)
+
+    def replay(self, done, batch_size):
+        memory_size = len( self.memory )
+        if done | (memory_size >= batch_size ):
+            batch_size = min( memory_size , batch_size )
+
+            minibatch = random.sample(self.memory, batch_size)
+
+            for state, action, reward, next_state, done in minibatch:
+                self.train_by_one_data( state, action, reward, next_state, done )
+
+            if self.epsilon > self.epsilon_min:
+                self.epsilon *= self.epsilon_decay
 
 
