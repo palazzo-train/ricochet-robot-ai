@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+# gvim
+*.py~
+*.py.un~
+*.un~
+*.swp
+.gitignore~
+README.md~
+
