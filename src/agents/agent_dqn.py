@@ -99,8 +99,19 @@ class DQNAgent:
 
             minibatch = random.sample(self.memory, batch_size)
 
+            train_x = []
+            train_y = []
             for state, action, reward, next_state, done in minibatch:
-                self.train_by_one_data( state, action, reward, next_state, done )
+                x, y = self.get_training_x_y( state, action, reward, next_state, done )
+
+                train_x.append( x )
+                train_y.append( y )
+
+            batch_x = np.concatenate( train_x )
+            batch_y = np.concatenate( train_y )
+
+            #self.model.fit(x, y, epochs=1, verbose=0)
+            self.model.fit(batch_x, batch_y, epochs=1, verbose=0)
 
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
