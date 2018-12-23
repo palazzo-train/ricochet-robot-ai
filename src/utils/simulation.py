@@ -207,6 +207,7 @@ class Experiment(object):
             if (self.debug_print_interval != 0 ):
                 if episode_number % self.debug_print_interval == 0 :
                     print('episode : ' + str(episode_number))
+                    self.agent.save_model()
             
             # if interactive display, show update for the episode
             if interactive:
