@@ -33,7 +33,7 @@ class RobotRebootExtractor():
                 ]
 
         self.robots = [ 0,0,0,0] 
-        self.goal = ( 0,0,'x')
+        self.goal = ( [0,0],'x')
 
         # chip on the right
         self.v_chip = np.zeros( (16,16) , dtype =bool)
@@ -109,7 +109,7 @@ class RobotRebootExtractor():
         #
         for i , c in zip( range(4) , [ 'r' , 'y' , 'g' , 'b' ] ):
             if ( p == self.goal_colors[i][0] ) & ( p2 == self.goal_colors[i][1] ):
-                self.goal = ( irow, icol , c)
+                self.goal = ( np.array( [irow, icol])  , c)
                 break
 
         ##

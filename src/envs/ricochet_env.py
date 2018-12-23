@@ -18,7 +18,7 @@ class RicochetEnv(gym.Env):
         b = robots[3]
 
 
-        goal = ( irow , icol , color )
+        goal = ( nd.array( [irow , icol ] ) , color )
 
         vertical and horizonal chips maps
 
@@ -63,16 +63,15 @@ class RicochetEnv(gym.Env):
         reward = -1
 
         # check done
-        target_robot = ['r' , 'y' , 'g' , 'b' ].index( self.goal[2] )
-        target_loc = [ self.goal[0] , self.goal[1] ]
+        target_robot = ['r' , 'y' , 'g' , 'b' ].index( self.goal[1] )
+        target_loc = self.goal[0] 
 
         done = False
-        if self.robots[target_robot] == target_loc :
+        if np.all( self.robots[target_robot] == target_loc ):
             reward = 1
             done = True
 
         if self.t > self.max_t :
-            reward = -2
             done = True
 
         self.t += 1
@@ -92,7 +91,7 @@ class RicochetEnv(gym.Env):
     #
     def init_board(self, rrg):
         self.cell_count = rrg.cell_count
-        self.init_robots = rrg.robots
+        self.init_robots = np.array(rrg.robots)
         self.goal = rrg.goal
 
         self.v_chip = rrg.v_chip
@@ -136,7 +135,7 @@ class RicochetEnv(gym.Env):
                         continue
 
                     # has robot 
-                    if self.robots[j] == [ cur_row , icol + 1] :
+                    if np.all( self.robots[j] == [ cur_row , icol + 1] ):
                         return cur_row , icol
 
     def go_W( self, robot_id, cur_row , cur_col ):
@@ -157,7 +156,7 @@ class RicochetEnv(gym.Env):
                         continue
 
                     # has robot  
-                    if self.robots[j] == [ cur_row , icol - 1] :
+                    if np.all( self.robots[j] == [ cur_row , icol - 1] ):
                         return cur_row , icol
 
     
@@ -179,7 +178,7 @@ class RicochetEnv(gym.Env):
                         continue
 
                     # has robot  
-                    if self.robots[j] == [ irow + 1, cur_col] :
+                    if np.all( self.robots[j] == [ irow + 1, cur_col] ):
                         return irow, cur_col
 
 
@@ -201,7 +200,7 @@ class RicochetEnv(gym.Env):
                         continue
 
                     # has robot  
-                    if self.robots[j] == [ irow - 1, cur_col] :
+                    if np.all( self.robots[j] == [ irow - 1, cur_col] ):
                         return irow, cur_col
 
     #####################################
@@ -229,7 +228,7 @@ class RicochetEnv(gym.Env):
                 (0,128,0), #g
                 (85,85,255) #b
                 ]
-        irow , icol , c= self.goal
+        (irow , icol ), c= self.goal
 
         x = icol * 40 
         y = irow * 40
