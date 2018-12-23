@@ -1,10 +1,16 @@
+import collections
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import Adam
+import numpy as np
+import random
 
 # Deep Q-learning Agent
 class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)
+        self.memory = collections.deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
@@ -37,7 +43,7 @@ class DQNAgent:
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
-              target = reward + self.gamma * \
+                target = reward + self.gamma * \
                        np.amax(self.model.predict(next_state)[0])
             target_f = self.model.predict(state)
             target_f[0][action] = target

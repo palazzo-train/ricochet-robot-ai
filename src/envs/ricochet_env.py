@@ -74,6 +74,8 @@ class RicochetEnv(gym.Env):
         self.robots = self.init_robots.copy()
         self.done = False
 
+        return self.robots
+
     ################
     #
     #  board setup
