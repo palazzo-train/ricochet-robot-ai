@@ -49,6 +49,24 @@ class DQNAgent:
         return action
 
 
+    def save_model( self , file_name = 'default'):
+        model = self.model 
+
+        model_json_file = file_name + '_model.json'
+        model_weight_file = file_name + '_weight.h5'
+        # serialize model to JSON
+        model_json = model.to_json()
+        with open(model_json_file, "w") as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights(model_weight_file)
+        print("Saved model to disk")
+
+    def load_model( self, loaded_model ):
+        self.model = loaded_model 
+        self.model.compile(loss='mse',
+                      optimizer=Adam(lr=self.learning_rate))
+
     def learn(self, state, action, reward, next_state, done):
         #print('state')
         #print(state)
