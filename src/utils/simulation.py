@@ -7,7 +7,7 @@ from matplotlib import pylab
 import matplotlib.gridspec as gridspec
 
 class Experiment(object):
-    def __init__(self, env, agent):
+    def __init__(self, env, agent, debug_print_interval = 0):
         
         self.env = env
         self.agent = agent
@@ -51,6 +51,8 @@ class Experiment(object):
         
         self.line, = self.ax1.plot(range(len(self.episode_length)),self.episode_length)
         self.line2, = self.ax2.plot(range(len(self.episode_reward)),self.episode_reward)
+
+        self.debug_print_interval = debug_print_interval
         
     def update_display_step(self):
         if not hasattr(self, 'imgplot'):
@@ -202,8 +204,9 @@ class Experiment(object):
             self.episode_length = np.append(self.episode_length,t) # keep episode length - for display
             self.episode_reward = np.append(self.episode_reward,R) # keep episode reward - for display 
 
-            if episode_number % 20 == 0 :
-                print('episode : ' + str(episode_number))
+            if (self.debug_print_interval != 0 ):
+                if episode_number % self.debug_print_interval == 0 :
+                    print('episode : ' + str(episode_number))
             
             # if interactive display, show update for the episode
             if interactive:

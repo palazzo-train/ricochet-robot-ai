@@ -38,7 +38,7 @@ class RicochetEnv(gym.Env):
         self.action_space = spaces.Discrete( 4*4 )
         self.observation_space = None
 
-        self.max_t = 16
+        self.max_t = ( 16 - 1 )
 
 
         ####
@@ -71,7 +71,7 @@ class RicochetEnv(gym.Env):
             reward = 1
             done = True
 
-        if self.t > self.max_t :
+        if self.t >= self.max_t :
             done = True
 
         self.t += 1
