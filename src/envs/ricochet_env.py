@@ -38,6 +38,8 @@ class RicochetEnv(gym.Env):
         self.action_space = spaces.Discrete( 4*4 )
         self.observation_space = None
 
+        self.max_t = 20
+
 
         ####
         #
@@ -66,13 +68,21 @@ class RicochetEnv(gym.Env):
 
         done = False
         if self.robots[target_robot] == target_loc :
+            reward = 1
             done = True
+
+        if self.t > self.max_t :
+            reward = -2
+            done = True
+
+        self.t += 1
 
         return self.robots , reward , done, ''
 
     def reset(self):
         self.robots = self.init_robots.copy()
         self.done = False
+        self.t = 0
 
         return self.robots
 
