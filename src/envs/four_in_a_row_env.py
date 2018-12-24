@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 import itertools as it
+from four_dqn_agent import DQNAgent
 
 class RandomNpcAgent():
     def __init__(self, b_height , b_width ):
@@ -28,7 +29,7 @@ class FourInARowEnv(gym.Env):
     '''
 
 
-    def __init__(self, npc_agent=None):
+    def __init__(self, default_npc=None, npc_agent=None):
         self.b_width = 7
         self.b_height = 6
         self.in_row_count = 4
@@ -40,10 +41,17 @@ class FourInARowEnv(gym.Env):
         self.player_button = -1
         self.npc_button = 1
 
-        if npc_agent is None:
-            self.npc_agent = RandomNpcAgent( self.b_height , self.b_width)
-        else:
+        if npc_agent is not None:
             self.npc_agent = npc_agent
+        else:
+
+            if default_npc is None:
+                self.npc_agent = RandomNpcAgent( self.b_height , self.b_width)
+            else:
+                print('load model default npc')
+                self.npc_agent = DQNAgent( state_size = ( self.b_width * self.b_height)  , 
+                                            action_size = self.b_width , 
+                                            model_file = '../trained_models/four_a_row/default_npc')
 
         ####
         #
