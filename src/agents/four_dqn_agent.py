@@ -9,8 +9,13 @@ from keras.models import model_from_json
 
 # Deep Q-learning Agent
 class DQNAgent:
+    '''
+    The agent assumes he is holding '-1'  button,  the env is holding '+1'  when training
 
-    def __init__(self, state_size, action_size, model_file=None):
+    if now when the agent is asked to hold '+1' button, we flip all the state variables from -1 to 1 and 1 to -1
+    '''
+
+    def __init__(self, state_size, action_size, my_button_color=-1, model_file=None):
         self.state_size = state_size
         self.action_size = action_size
         self.memory = collections.deque(maxlen=2000)
@@ -19,6 +24,12 @@ class DQNAgent:
         self.epsilon_min = 0.30
         self.epsilon_decay = 0.9995
         self.learning_rate = 0.001
+
+        if my_button_color == -1 :
+            self.button_color_invert = 1 # to multiple the state by this varible. meaning no change
+        else:
+            self.button_color_invert = -1 # to multiple the state by this varible. meaning -1 to 1 , 1 to -1 
+
 
         if model_file is None:
             self.model = self._build_model()
@@ -43,20 +54,24 @@ class DQNAgent:
         self._compile_model()
         return model
 
-    def remember(self, state, action, reward, next_state, done):
+    def _remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
+    def _flip_state(self,state):
+        board, a , b = state 
+        board = board * self.button_color_invert 
+
+        state = board.reshape( [1, self.state_size])
+
+        return state
+
     def act(self, state):
-        
-        
         if np.random.rand() <= self.epsilon:
             action = random.randrange(self.action_size)
             return action
         
-
         #state = ( self.board.copy() , act_row, act_col )
-        board, _ , _ = state 
-        state = board.reshape( [1, self.state_size])
+        state = self._flip_state(state)
 
         act_values = self.model.predict(state)
         
@@ -103,17 +118,14 @@ class DQNAgent:
         #print(state)
         #print('next state')
         #print(next_state)
-        board, _ , _ = state 
-        state = board.reshape( [1, self.state_size])
+        state = self._flip_state(state)
+        next_state = self._flip_state(next_state)
 
-        next_board, _ , _ = next_state 
-        next_state = next_board.reshape( [1, self.state_size])
-
-        self.remember(state, action, reward, next_state, done)
-        self.replay(done, batch_size = 16)
+        self._remember(state, action, reward, next_state, done)
+        self._replay(done, batch_size = 16)
 
 
-    def get_training_x_y( self, state, action, reward, next_state, done ):
+    def _get_training_x_y( self, state, action, reward, next_state, done ):
         target = reward
         
         if not done:
@@ -129,25 +141,7 @@ class DQNAgent:
 
         return state , target_f
 
-    def train_by_one_data( self, state, action, reward, next_state, done ):
-        target = reward
-        
-        if not done:
-            predict_next_state_action_values = self.model.predict(next_state)
-            
-            max_next_state_action_value = np.amax( predict_next_state_action_values[0] )
-            
-            target = reward + self.gamma * max_next_state_action_value
-
-        target_f = self.model.predict(state)
-
-        target_f[0][action] = target
-        print('train')
-        print( state , target_f )
-        print( state.shape , target_f.shape)
-        self.model.fit(state, target_f, epochs=1, verbose=0)
-
-    def replay(self, done, batch_size):
+    def _replay(self, done, batch_size):
         memory_size = len( self.memory )
         # if done | (memory_size >= batch_size ):
         if (memory_size >= batch_size ):
@@ -158,7 +152,7 @@ class DQNAgent:
             train_x = []
             train_y = []
             for state, action, reward, next_state, done in minibatch:
-                x, y = self.get_training_x_y( state, action, reward, next_state, done )
+                x, y = self._get_training_x_y( state, action, reward, next_state, done )
 
                 train_x.append( x )
                 train_y.append( y )

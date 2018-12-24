@@ -51,6 +51,7 @@ class FourInARowEnv(gym.Env):
                 print('load model default npc')
                 self.npc_agent = DQNAgent( state_size = ( self.b_width * self.b_height)  , 
                                             action_size = self.b_width , 
+                                            my_button_color = 1,  ### as in env, the agent hold +1 'green' button
                                             model_file = '../trained_models/four_a_row/default_npc')
 
         ####
@@ -120,6 +121,15 @@ class FourInARowEnv(gym.Env):
         self.max_placed_button = (self.b_height * self.b_width)
 
         return self.board.copy() , -1 , -1
+
+
+    def manual_step(self, action , player):
+        reward = 0
+        done , act_row, act_col = self.player_step(action , player )
+        state = ( self.board.copy() , act_row, act_col )
+        return state , reward , done, ''
+
+
 
     ################
     #
