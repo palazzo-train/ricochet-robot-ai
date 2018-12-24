@@ -110,7 +110,7 @@ class FourInARowEnv(gym.Env):
         done = False
         # the column is full
         if self.avail_row[act_col] == -1 :
-            act_row = -1
+            act_row = -10
             return done, act_row , act_col 
 
         self.board[ self.avail_row[act_col] , act_col ] = act_button
