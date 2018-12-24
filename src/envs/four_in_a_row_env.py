@@ -69,6 +69,14 @@ class FourInARowEnv(gym.Env):
 
         done, act_row , act_col = self.player_step(act_col, self.player_button )
 
+        # wrong move
+        # state no change
+        if act_row == -1: # wrong move
+            reward = -10
+            done = False  # to give the agent player to move again but with -ve reward
+            state = ( self.board.copy() , act_row, act_col )
+            return state , reward , done, ''
+
         # player won
         if done:
             reward = 1
@@ -87,7 +95,14 @@ class FourInARowEnv(gym.Env):
 
         # NPC response
         npc_action = self.npc_agent.act( (self.board, -1 , -1))
-        done , _ , _  = self.player_step(npc_action, self.npc_button )
+        done , act_row , _  = self.player_step(npc_action, self.npc_button )
+        # wrong move by npc
+        # state no change
+        if act_row == -1: # wrong move
+            # the npc agen made wrong move. fallback to a random and move again
+            npc_action = np.random.choice ( np.where( self.board[0,:] == 0)[0] )
+
+            done , act_row , _  = self.player_step(npc_action, self.npc_button )
 
         #check is npc won
         if done:
@@ -152,14 +167,12 @@ class FourInARowEnv(gym.Env):
         done = False
         # the column is full
         if self.avail_row[act_col] == -1 :
-            act_row = -10
-            return done, act_row , act_col 
+            act_row = -1 # wrong move
+            return done, act_row , act_col  
 
         self.board[ self.avail_row[act_col] , act_col ] = act_button
         act_row = self.avail_row[act_col] 
         self.avail_row[act_col] -= 1
-
-
 
         done = self.check_win( act_button , act_row , act_col)
         return done, act_row , act_col
