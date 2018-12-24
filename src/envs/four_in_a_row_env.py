@@ -72,8 +72,8 @@ class FourInARowEnv(gym.Env):
         # wrong move
         # state no change
         if act_row == -1: # wrong move
-            reward = -10
-            done = False  # to give the agent player to move again but with -ve reward
+            reward = -1
+            done = True
             state = ( self.board.copy() , act_row, act_col )
             return state , reward , done, ''
 
