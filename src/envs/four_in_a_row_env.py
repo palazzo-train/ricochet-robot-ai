@@ -66,6 +66,16 @@ class FourInARowEnv(gym.Env):
             state = ( self.board.copy() , act_row, act_col )
             return state , reward , done, ''
 
+        self.placed_button += 1
+
+        ## check no space
+        if self.placed_button >= self.max_placed_button :
+            # no space
+            reward = 1
+            done = True
+            state = ( self.board.copy() , act_row, act_col )
+            return state , reward , done, ''
+
         # NPC response
         npc_action = self.npc_agent.act( (self.board, -1 , -1))
         done , _ , _  = self.player_step(npc_action, self.npc_button )
@@ -79,6 +89,18 @@ class FourInARowEnv(gym.Env):
         reward = 0
         state = ( self.board.copy() , act_row, act_col )
 
+        self.placed_button += 1
+
+        ## check no space
+        if self.placed_button >= self.max_placed_button :
+            # no space
+            reward = 1
+            done = True
+            state = ( self.board.copy() , act_row, act_col )
+            return state , reward , done, ''
+
+
+
         return state , reward , done, ''
 
 
@@ -86,6 +108,8 @@ class FourInARowEnv(gym.Env):
         self.board = np.zeros( (self.b_height , self.b_width)).astype(int)
         self.avail_row = np.ones( self.b_width ) .astype(int) * ( self.b_height - 1)
         self.t = 0
+        self.placed_button = 0
+        self.max_placed_button = (self.b_height * self.b_width)
 
         return self.board.copy() , -1 , -1
 
