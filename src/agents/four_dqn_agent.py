@@ -132,6 +132,7 @@ class DQNAgent():
         self.model = models[model_name](action_size , self.board_size, model_save_path=model_save_path)
 
         if continue_model:
+            print('agent with button ' + str(self.my_button_colr) + ' is loading model')
             self.model.load_model_from_file()
 
     def _remember(self, state, action, reward, next_state, done):
