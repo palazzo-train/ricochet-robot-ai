@@ -3,6 +3,7 @@ from agent_dqn import DQNAgent
 from robot_reboot_extractor import RobotRebootExtractor
 from ricochet_env import RicochetEnv
 from keras import backend as K
+import numpy as np
 
 from keras.models import model_from_json
 
