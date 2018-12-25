@@ -140,8 +140,7 @@ class FourInARowEnv(gym.Env):
         act_col = -1
 
         ### random, sometime npc moves first
-        who = random.choice( [0,1])
-        if who == 0 :
+        if np.random.rand() >= 0.25 :
             npc_action = self.npc_agent.act( (self.board, -1 , -1))
             done, act_row , act_col = self.player_step(npc_action, self.npc_button)
             state = ( self.board.copy() , act_row, act_col )

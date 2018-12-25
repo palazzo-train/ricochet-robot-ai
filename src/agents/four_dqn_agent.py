@@ -7,82 +7,14 @@ import random
 from keras import backend as K
 from keras.models import model_from_json
 
-# Deep Q-learning Agent
-class DQNAgent:
-    '''
-    The agent assumes he is holding '-1'  button,  the env is holding '+1'  when training
 
-    if now when the agent is asked to hold '+1' button, we flip all the state variables from -1 to 1 and 1 to -1
-    '''
-
-    def __init__(self, state_size, action_size, my_button_color=-1, model_file=None):
-        self.state_size = state_size
-        self.action_size = action_size
-        self.memory = collections.deque(maxlen=2000)
-        self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.30
-        self.epsilon_decay = 0.9995
-        self.learning_rate = 0.001
-
-        if my_button_color == -1 :
-            self.button_color_invert = 1 # to multiple the state by this varible. meaning no change
-        else:
-            self.button_color_invert = -1 # to multiple the state by this varible. meaning -1 to 1 , 1 to -1 
-
-
-        if model_file is None:
-            self.model = self._build_model()
-            default_model_name = 'four_dqn'
-            self.model_file = default_model_name 
-        else:
-            self.model_file = model_file
-            self.load_model_from_file(model_file)
-
-
-    def _compile_model(self):
-        self.model.compile(loss='mse',
-                      optimizer=Adam(lr=self.learning_rate))
-
-    def _build_model(self):
-        # Neural Net for Deep-Q learning Model
-        model = Sequential()
-        model.add(Dense(52, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(8, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))
-
-        self._compile_model()
-        return model
-
-    def _remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-
-    def _flip_state(self,state):
-        board, a , b = state 
-        board = board * self.button_color_invert 
-
-        state = board.reshape( [1, self.state_size])
-
-        return state
-
-    def act(self, state):
-        if np.random.rand() <= self.epsilon:
-            action = random.randrange(self.action_size)
-            return action
-        
-        #state = ( self.board.copy() , act_row, act_col )
-        state = self._flip_state(state)
-
-        act_values = self.model.predict(state)
-        
-        action = np.argmax(act_values[0])  # returns action
-
-        return action
-
+class BaseModel():
+    def __init__(self,model_save_path):
+        self.model_save_path = model_save_path
 
     def save_model( self ):
+        file_name = self.model_save_path + '/' + self.model_name
 
-        file_name = self.model_file
         model = self.model 
 
         model_json_file = file_name + '_model.json'
@@ -99,9 +31,11 @@ class DQNAgent:
         self.model = loaded_model 
         self._compile_model()
 
-    def load_model_from_file(self, file_name='model'):
+    def load_model_from_file(self):
+        file_name = self.model_save_path + '/' + self.model_name
         model_json_file = file_name + '_model.json'
         model_weight_file = file_name + '_weight.h5'
+
         # load json and create model
         json_file = open(model_json_file, 'r')
         loaded_model_json = json_file.read()
@@ -111,7 +45,119 @@ class DQNAgent:
         loaded_model.load_weights(model_weight_file)
 
         self.load_model( loaded_model )
-        print("Loaded model from disk")
+        print("Loaded model from disk : " + str(file_name))
+
+
+
+
+
+####################
+#
+#  simple NN model
+#
+class DQNModel(BaseModel):
+    def __init__(self, action_size , board_size, model_save_path='.'):
+        super(DQNModel, self).__init__(model_save_path)
+
+        self.model_name = 'NN_128x16'
+        self.learning_rate = 0.001
+        self.input_dim = np.prod( board_size )
+
+        self.action_size = action_size
+        self.model = self._build_model()
+
+
+    def _build_model(self):
+        # Neural Net for Deep-Q learning Model
+        model = Sequential()
+        model.add(Dense(128, input_dim=self.input_dim, activation='relu'))
+        model.add(Dense(16, activation='relu'))
+        model.add(Dense(self.action_size, activation='linear'))
+
+        self.model = model
+        self._compile_model()
+        return model
+
+    def _compile_model(self):
+        self.model.compile(loss='mse',
+                      optimizer=Adam(lr=self.learning_rate))
+
+
+    def predict(self, state):
+        act_values = self.model.predict(state)
+
+        return act_values
+
+    def state_conversion(self,state):
+        state = state.reshape( [1, self.input_dim])
+
+        return state
+
+    def fit(self, batch_x, batch_y, epochs=1, verbose=0):
+        self.model.fit(batch_x, batch_y, epochs=1, verbose=0)
+
+# Deep Q-learning Agent
+class DQNAgent():
+    '''
+    The agent assumes he is holding '-1'  button,  the env is holding '+1'  when training
+
+    if now when the agent is asked to hold '+1' button, we flip all the state variables from -1 to 1 and 1 to -1
+    '''
+
+    def __init__(self, board_size, action_size, my_button_color=-1, model_name=None, continue_model =False):
+        self.board_size = board_size
+        self.action_size = action_size
+        self.memory = collections.deque(maxlen=2000)
+        self.gamma = 0.95    # discount rate
+        self.epsilon = 1.0  # exploration rate
+        self.epsilon_min = 0.30
+        self.epsilon_decay = 0.9995
+
+
+
+        if my_button_color == -1 :
+            self.button_color_invert = 1 # to multiple the state by this varible. meaning no change
+        else:
+            self.button_color_invert = -1 # to multiple the state by this varible. meaning -1 to 1 , 1 to -1 
+
+
+        model_save_path  = '../trained_models/four_a_row'
+        models = {
+            'default' : DQNModel  
+        }
+
+        if model_name is None:
+            self.model = models['default'](action_size , self.board_size, model_save_path=model_save_path)
+        else:
+            self.model = models[model_name](action_size , self.board_size, model_save_path=model_save_path)
+
+        if continue_model:
+            self.model.load_model_from_file()
+
+    def _remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+
+    def _flip_state(self,state):
+        board, _ , _ = state 
+        board = board * self.button_color_invert 
+
+        return board 
+
+    def act(self, state):
+        if np.random.rand() <= self.epsilon:
+            action = random.randrange(self.action_size)
+            return action
+        
+        #state = ( self.board.copy() , act_row, act_col )
+        state = self._flip_state(state)
+        state = self.model.state_conversion(state)
+        act_values = self.model.predict(state)
+        
+        action = np.argmax(act_values[0])  # returns action
+
+        return action
+
+
 
     def learn(self, state, action, reward, next_state, done):
         #print('state')
@@ -119,7 +165,9 @@ class DQNAgent:
         #print('next state')
         #print(next_state)
         state = self._flip_state(state)
+        state = self.model.state_conversion(state)
         next_state = self._flip_state(next_state)
+        next_state = self.model.state_conversion(next_state)
 
         self._remember(state, action, reward, next_state, done)
         self._replay(done, batch_size = 16)
@@ -163,10 +211,12 @@ class DQNAgent:
             #self.model.fit(x, y, epochs=1, verbose=0)
             self.model.fit(batch_x, batch_y, epochs=1, verbose=0)
 
-
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
 
+
+    def save_model(self):
+        self.model.save_model()
 
 
 
