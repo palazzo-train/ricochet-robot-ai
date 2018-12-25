@@ -65,7 +65,7 @@ class FourInARowEnv(gym.Env):
         # wrong move
         # state no change
         if act_row == -1: # wrong move
-            reward = -1
+            reward = -10
             done = True
             state = ( self.board.copy() , act_row, act_col )
             return state , reward , done, ''
@@ -81,7 +81,7 @@ class FourInARowEnv(gym.Env):
         ## check no space
         if self.placed_button >= self.max_placed_button :
             # no space
-            reward = 1
+            reward = 0
             done = True
             state = ( self.board.copy() , act_row, act_col )
             return state , reward , done, ''
@@ -109,9 +109,11 @@ class FourInARowEnv(gym.Env):
         self.placed_button += 1
 
         ## check no space
+        ##
+        ##  draw game
         if self.placed_button >= self.max_placed_button :
             # no space
-            reward = 1
+            reward = 0
             done = True
             state = ( self.board.copy() , act_row, act_col )
             return state , reward , done, ''
