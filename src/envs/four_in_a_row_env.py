@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 import itertools as it
+import random
 from four_dqn_agent import DQNAgent
 
 class RandomNpcAgent():
@@ -53,6 +54,7 @@ class FourInARowEnv(gym.Env):
                                             action_size = self.b_width , 
                                             my_button_color = 1,  ### as in env, the agent hold +1 'green' button
                                             model_file = '../trained_models/four_a_row/default_npc')
+                self.npc_agent.epsilon = 0.20  # exploration rate
 
         ####
         #
@@ -124,7 +126,6 @@ class FourInARowEnv(gym.Env):
             return state , reward , done, ''
 
 
-
         return state , reward , done, ''
 
 
@@ -135,7 +136,20 @@ class FourInARowEnv(gym.Env):
         self.placed_button = 0
         self.max_placed_button = (self.b_height * self.b_width)
 
-        return self.board.copy() , -1 , -1
+        act_row = -1
+        act_col = -1
+
+        ### random, sometime npc moves first
+        who = random.choice( [0,1])
+        if who == 0 :
+            npc_action = self.npc_agent.act( (self.board, -1 , -1))
+            done, act_row , act_col = self.player_step(npc_action, self.npc_button)
+            state = ( self.board.copy() , act_row, act_col )
+            return state 
+
+
+        state = ( self.board.copy() , act_row, act_col )
+        return state
 
 
     def manual_step(self, action , player):
