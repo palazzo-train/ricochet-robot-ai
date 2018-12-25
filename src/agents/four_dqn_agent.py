@@ -123,13 +123,13 @@ class DQNAgent():
 
         model_save_path  = '../trained_models/four_a_row'
         models = {
-            'default' : DQNModel  
+            'NN_128x16' : DQNModel,
         }
 
         if model_name is None:
-            self.model = models['default'](action_size , self.board_size, model_save_path=model_save_path)
-        else:
-            self.model = models[model_name](action_size , self.board_size, model_save_path=model_save_path)
+            model_name = 'NN_128x16'
+
+        self.model = models[model_name](action_size , self.board_size, model_save_path=model_save_path)
 
         if continue_model:
             self.model.load_model_from_file()
