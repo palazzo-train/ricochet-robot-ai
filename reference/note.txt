@@ -1,0 +1,6 @@
+Check:
+  https://towardsdatascience.com/cartpole-introduction-to-reinforcement-learning-ed0eb5b58288
+  
+  1. when terminal, q_s_a = r only
+  2. to fit, replace q_s[a] = target_q
+  
