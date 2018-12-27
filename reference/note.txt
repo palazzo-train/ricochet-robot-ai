@@ -1,6 +1,11 @@
-Check:
+Check 1 :
   https://towardsdatascience.com/cartpole-introduction-to-reinforcement-learning-ed0eb5b58288
   
   1. when terminal, q_s_a = r only
   2. to fit, replace q_s[a] = target_q
+  
+Check 2: 
+  https://towardsdatascience.com/atari-reinforcement-learning-in-depth-part-1-ddqn-ceaa762a546f
+  
+  ddqn https://gist.github.com/gsurma/7ff691f56dbdbbb8d6966d470371a1d8
   
