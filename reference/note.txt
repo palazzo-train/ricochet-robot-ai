@@ -11,5 +11,7 @@ Check 2:
   https://github.com/gsurma/atari/blob/master/game_models/ddqn_game_model.py
   
 
-  
+Check 3:
+  logger
+  loss = https://github.com/gsurma/atari/blob/a4be7747450e7e24ec837ebe506479c21d35aa4a/game_models/ddqn_game_model.py#L143
   
