@@ -8,4 +8,8 @@ Check 2:
   https://towardsdatascience.com/atari-reinforcement-learning-in-depth-part-1-ddqn-ceaa762a546f
   
   ddqn https://gist.github.com/gsurma/7ff691f56dbdbbb8d6966d470371a1d8
+  https://github.com/gsurma/atari/blob/master/game_models/ddqn_game_model.py
+  
+
+  
   
